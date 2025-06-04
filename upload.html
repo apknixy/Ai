@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Airaview | Upload</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Upload to Airaview</h2>
+    <div class="card" style="padding: 20px; max-width: 500px; margin: auto;">
+      <label for="mediaType">Choose Type:</label>
+      <select id="mediaType">
+        <option value="video">YouTube Video</option>
+        <option value="short">YouTube Short</option>
+      </select>
+
+      <label for="titleInput">Title (2–100 words):</label>
+      <input type="text" id="titleInput" placeholder="Enter title" />
+
+      <label for="descInput">Description (max 4000 chars):</label>
+      <textarea id="descInput" rows="4" placeholder="Enter description"></textarea>
+
+      <label for="tagsInput">Tags (comma-separated, max 500 words):</label>
+      <input type="text" id="tagsInput" placeholder="tag1,tag2,tag3..." />
+
+      <label for="linkInput">YouTube Link / Short Link:</label>
+      <input type="text" id="linkInput" placeholder="https://youtu.be/xxxxxxx" />
+
+      <button id="uploadBtn" class="btn">Upload</button>
+    </div>
+  </div>
+
+  <!-- Firebase + main.js -->
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
