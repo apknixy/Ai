@@ -1,0 +1,173 @@
+/* assets/css/styles.css */
+
+/* Basic reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f0f2f5;
+  color: #333;
+  line-height: 1.4;
+}
+
+/* Container */
+.container {
+  width: 90%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+/* Card style */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+/* Headers */
+h1, h2, h3 {
+  color: #333;
+  margin-bottom: 15px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  background: #4285f4;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.btn.google {
+  background: #db4437;
+}
+
+.btn.facebook {
+  background: #3b5998;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* Form inputs */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* Video thumbnail grid */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+  gap: 15px;
+}
+
+/* Thumbnail card */
+.thumb-card {
+  position: relative;
+  cursor: pointer;
+}
+.thumb-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+.thumb-info {
+  padding: 8px;
+}
+.thumb-info h4 {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+.thumb-info p {
+  font-size: 13px;
+  color: #666;
+}
+
+/* Shorts vertical scroll */
+.shorts-container {
+  display: flex;
+  overflow-x: scroll;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+.shorts-card {
+  min-width: 250px;
+  position: relative;
+  cursor: pointer;
+}
+.shorts-card img {
+  width: 100%;
+  border-radius: 8px;
+}
+.shorts-info {
+  padding: 6px;
+}
+
+/* Search bar */
+.search-bar {
+  margin-bottom: 20px;
+  text-align: center;
+}
+.search-bar input {
+  width: 80%;
+  max-width: 500px;
+  display: inline-block;
+}
+.search-bar button {
+  display: inline-block;
+  margin-left: 8px;
+}
+
+/* Profile */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.profile-header img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+.profile-header .info {
+  flex: 1;
+}
+.profile-header .info h2 {
+  margin-bottom: 8px;
+}
+.profile-header .info p {
+  margin-bottom: 4px;
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .video-grid {
+    grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+  }
+}
