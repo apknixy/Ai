@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Airaview | Profile</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    #profilePic {
+      font-size: 64px;
+      margin-bottom: 10px;
+    }
+    #emojiPicker button {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="profile-header card">
+      <div id="profilePic">🙂</div>
+      <div class="info">
+        <h2 id="uname">Channel Name</h2>
+        <p id="emailAddr">email@example.com</p>
+        <p id="totalViews">Total Views: 0</p>
+      </div>
+      <button id="logoutProfileBtn" class="btn" style="background: #555; height: 40px;">Logout</button>
+    </div>
+
+    <div class="card" style="padding: 15px;">
+      <h3>Choose Profile Picture (Emoji)</h3>
+      <div id="emojiPicker"></div>
+    </div>
+
+    <div class="card" style="padding: 15px;">
+      <h3>Channel Description</h3>
+      <p id="channelDesc">No description yet. Add one!</p>
+    </div>
+
+    <div class="card" style="padding: 15px;">
+      <h3>My Uploads</h3>
+      <ul id="myUploads" style="list-style: none;"></ul>
+    </div>
+
+    <a href="home.html" class="btn" style="background: #555; margin-top: 20px;">Back to Home</a>
+  </div>
+
+  <!-- Firebase + main.js -->
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
