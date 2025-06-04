@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Airaview | Home</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Header / Search Bar / Logout -->
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 id="welcomeMsg">Welcome</h2>
+      <button id="logoutBtn" class="btn" style="background: #555;">Logout</button>
+    </div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search videos or tags..." />
+      <button id="searchBtn" class="btn">Search</button>
+    </div>
+
+    <!-- Shorts (horizontal scroll) -->
+    <h3>Shorts</h3>
+    <div id="shortsRow" class="shorts-container"></div>
+    <div id="ad-native" style="margin: 20px;"></div>
+
+    <!-- Video Grid -->
+    <h3>All Videos</h3>
+    <div id="videoGrid" class="video-grid"></div>
+    <div id="ad-468x60" style="margin: 20px auto; text-align: center;"></div>
+
+    <!-- Bottom Menu -->
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 10px 0; box-shadow: 0 -2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-around;">
+      <a href="home.html" class="btn" style="background: transparent; color: #4285f4;">Home</a>
+      <a href="home.html#shorts" class="btn" style="background: transparent; color: #4285f4;">Shorts</a>
+      <a href="upload.html" class="btn" style="background: transparent; color: #4285f4;">Upload</a>
+      <a href="profile.html" class="btn" style="background: transparent; color: #4285f4;">Profile</a>
+    </div>
+  </div>
+
+  <!-- Firebase + main.js -->
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
