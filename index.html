@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Airaview | Sign In</title>
+
+  <!-- FIREBASE “COMPAT” SDKs (so that firebase.auth() and signInWithPopup exist) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <!-- SHARED STYLESHEET -->
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
@@ -11,16 +18,158 @@
     <div class="card" style="padding: 30px; max-width: 400px; margin: auto;">
       <h2>Welcome to Airaview</h2>
       <p>Please choose a sign-in method:</p>
-      <button class="btn google">Sign in with Google</button>
-      <button class="btn facebook">Sign in with Facebook</button>
+      <button id="btnGoogle" class="btn google">Sign in with Google</button>
+      <button id="btnFacebook" class="btn facebook">Sign in with Facebook</button>
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
-        After sign-in, your unique channel name will be created from your email (before “@”).  
-        If it’s already taken, you’ll be prompted to change your alias.
+        Your channel name will be created from your email prefix.  
+        If it’s already taken, you’ll be asked to use a different alias.
       </p>
     </div>
   </div>
 
-  <!-- Firebase + main.js -->
-  <script type="module" src="assets/js/main.js"></script>
+  <script>
+    // ───────────────────────────────────────────────────────────────────────────────
+    // 1) Initialize Firebase (compat)
+    // ───────────────────────────────────────────────────────────────────────────────
+    const firebaseConfig = {
+      apiKey: "AIzaSyBnbLZ6GQgRDMurhcGAJ5KseTrFPNq3-js",
+      authDomain: "airaview.firebaseapp.com",
+      databaseURL: "https://airaview-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "airaview",
+      storageBucket: "airaview.appspot.com",
+      messagingSenderId: "547164172741",
+      appId: "1:547164172741:web:9ffc76f0522610d91b9bac"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const database = firebase.database();
+
+    // Helper: generate a channelName from email prefix
+    function makeChannelName(email) {
+      return email.split("@")[0].replace(/\./g, "_");
+    }
+
+    // Helper: check if channelName exists in Realtime Database
+    function checkChannelExists(channelName) {
+      return database.ref("channels/" + channelName).once("value")
+        .then(snapshot => snapshot.exists());
+    }
+
+    // Helper: register channel info
+    function registerChannel(channelName, data) {
+      return database.ref("channels/" + channelName).set(data);
+    }
+
+    // ───────────────────────────────────────────────────────────────────────────────
+    // 2) Google Sign-In Handler
+    // ───────────────────────────────────────────────────────────────────────────────
+    document.getElementById("btnGoogle").addEventListener("click", () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(async (result) => {
+          const user = result.user;
+          const email = user.email;
+          const displayName = user.displayName || "";
+          const profilePic = user.photoURL || "";
+          let channelName = makeChannelName(email);
+
+          // Check if channel already taken
+          const exists = await checkChannelExists(channelName);
+          if (exists) {
+            alert(`Channel name “${channelName}” already taken. Please change your email alias before continuing.`);
+            await auth.signOut();
+            return;
+          }
+
+          // Register channel in DB
+          await registerChannel(channelName, {
+            email: email,
+            displayName: displayName,
+            profilePic: profilePic,
+            createdAt: Date.now(),
+            totalViews: 0
+          });
+
+          // Save user info locally
+          const userInfo = {
+            uid: user.uid,
+            email: email,
+            displayName: displayName,
+            channelName: channelName
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+          // Pass to MIT App Inventor (if WebViewer)
+          if (window.AppInventor) {
+            window.AppInventor.setWebViewString(JSON.stringify(userInfo));
+          }
+
+          // Redirect to home page
+          window.location.href = "home.html";
+        })
+        .catch((error) => {
+          alert("Google Login Failed: " + error.message);
+        });
+    });
+
+    // ───────────────────────────────────────────────────────────────────────────────
+    // 3) Facebook Sign-In Handler
+    // ───────────────────────────────────────────────────────────────────────────────
+    document.getElementById("btnFacebook").addEventListener("click", () => {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(async (result) => {
+          const user = result.user;
+          const email = user.email;
+          const displayName = user.displayName || "";
+          const profilePic = user.photoURL || "";
+          let channelName = makeChannelName(email);
+
+          const exists = await checkChannelExists(channelName);
+          if (exists) {
+            alert(`Channel name “${channelName}” already taken. Please change your email alias.`);
+            await auth.signOut();
+            return;
+          }
+
+          await registerChannel(channelName, {
+            email: email,
+            displayName: displayName,
+            profilePic: profilePic,
+            createdAt: Date.now(),
+            totalViews: 0
+          });
+
+          const userInfo = {
+            uid: user.uid,
+            email: email,
+            displayName: displayName,
+            channelName: channelName
+          };
+          localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
+          if (window.AppInventor) {
+            window.AppInventor.setWebViewString(JSON.stringify(userInfo));
+          }
+
+          window.location.href = "home.html";
+        })
+        .catch((error) => {
+          alert("Facebook Login Failed: " + error.message);
+        });
+    });
+
+    // ───────────────────────────────────────────────────────────────────────────────
+    // 4) Auto-Redirect If Already Logged In
+    // ───────────────────────────────────────────────────────────────────────────────
+    window.addEventListener("load", () => {
+      const stored = localStorage.getItem("userInfo");
+      if (stored) {
+        // If already logged in, skip login screen
+        window.location.href = "home.html";
+      }
+    });
+  </script>
 </body>
 </html>
