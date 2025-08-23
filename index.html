@@ -1,175 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Airaview | Sign In</title>
-
-  <!-- FIREBASE “COMPAT” SDKs (so that firebase.auth() and signInWithPopup exist) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
-
-  <!-- SHARED STYLESHEET -->
-  <link rel="stylesheet" href="assets/css/styles.css" />
-</head>
-<body>
-  <div class="container">
-    <div class="card" style="padding: 30px; max-width: 400px; margin: auto;">
-      <h2>Welcome to Airaview</h2>
-      <p>Please choose a sign-in method:</p>
-      <button id="btnGoogle" class="btn google">Sign in with Google</button>
-      <button id="btnFacebook" class="btn facebook">Sign in with Facebook</button>
-      <p style="margin-top: 20px; font-size: 14px; color: #666;">
-        Your channel name will be created from your email prefix.  
-        If it’s already taken, you’ll be asked to use a different alias.
-      </p>
-    </div>
-  </div>
+  <meta charset="UTF-8">
+  <title>Ytify Login</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 
   <script>
-    // ───────────────────────────────────────────────────────────────────────────────
-    // 1) Initialize Firebase (compat)
-    // ───────────────────────────────────────────────────────────────────────────────
     const firebaseConfig = {
-      apiKey: "AIzaSyBnbLZ6GQgRDMurhcGAJ5KseTrFPNq3-js",
-      authDomain: "airaview.firebaseapp.com",
-      databaseURL: "https://airaview-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "airaview",
-      storageBucket: "airaview.appspot.com",
-      messagingSenderId: "547164172741",
-      appId: "1:547164172741:web:9ffc76f0522610d91b9bac"
+      apiKey: "AIzaSyDmuE4wLWv1ZGfuAUmiRBH1Pz21M3Xs4kc",
+      authDomain: "ytify-8982c.firebaseapp.com",
+      databaseURL: "https://ytify-8982c-default-rtdb.firebaseio.com",
+      projectId: "ytify-8982c",
+      storageBucket: "ytify-8982c.appspot.com",
+      messagingSenderId: "1072469051926",
+      appId: "1:1072469051926:web:45d164d9e150bdf0d1c337",
+      measurementId: "G-VFFG8ER5Q2"
     };
     firebase.initializeApp(firebaseConfig);
 
-    const auth = firebase.auth();
-    const database = firebase.database();
+    function login() {
+      let email = document.getElementById("email").value;
+      let pass = document.getElementById("password").value;
 
-    // Helper: generate a channelName from email prefix
-    function makeChannelName(email) {
-      return email.split("@")[0].replace(/\./g, "_");
-    }
-
-    // Helper: check if channelName exists in Realtime Database
-    function checkChannelExists(channelName) {
-      return database.ref("channels/" + channelName).once("value")
-        .then(snapshot => snapshot.exists());
-    }
-
-    // Helper: register channel info
-    function registerChannel(channelName, data) {
-      return database.ref("channels/" + channelName).set(data);
-    }
-
-    // ───────────────────────────────────────────────────────────────────────────────
-    // 2) Google Sign-In Handler
-    // ───────────────────────────────────────────────────────────────────────────────
-    document.getElementById("btnGoogle").addEventListener("click", () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(async (result) => {
-          const user = result.user;
-          const email = user.email;
-          const displayName = user.displayName || "";
-          const profilePic = user.photoURL || "";
-          let channelName = makeChannelName(email);
-
-          // Check if channel already taken
-          const exists = await checkChannelExists(channelName);
-          if (exists) {
-            alert(`Channel name “${channelName}” already taken. Please change your email alias before continuing.`);
-            await auth.signOut();
-            return;
-          }
-
-          // Register channel in DB
-          await registerChannel(channelName, {
-            email: email,
-            displayName: displayName,
-            profilePic: profilePic,
-            createdAt: Date.now(),
-            totalViews: 0
-          });
-
-          // Save user info locally
-          const userInfo = {
-            uid: user.uid,
-            email: email,
-            displayName: displayName,
-            channelName: channelName
-          };
-          localStorage.setItem("userInfo", JSON.stringify(userInfo));
-
-          // Pass to MIT App Inventor (if WebViewer)
-          if (window.AppInventor) {
-            window.AppInventor.setWebViewString(JSON.stringify(userInfo));
-          }
-
-          // Redirect to home page
-          window.location.href = "home.html";
+      firebase.auth().signInWithEmailAndPassword(email, pass)
+        .then((user) => {
+          // MIT App ko inform karega
+          window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + email);
         })
         .catch((error) => {
-          alert("Google Login Failed: " + error.message);
+          alert(error.message);
         });
-    });
+    }
 
-    // ───────────────────────────────────────────────────────────────────────────────
-    // 3) Facebook Sign-In Handler
-    // ───────────────────────────────────────────────────────────────────────────────
-    document.getElementById("btnFacebook").addEventListener("click", () => {
-      const provider = new firebase.auth.FacebookAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(async (result) => {
-          const user = result.user;
-          const email = user.email;
-          const displayName = user.displayName || "";
-          const profilePic = user.photoURL || "";
-          let channelName = makeChannelName(email);
+    function register() {
+      let email = document.getElementById("email").value;
+      let pass = document.getElementById("password").value;
 
-          const exists = await checkChannelExists(channelName);
-          if (exists) {
-            alert(`Channel name “${channelName}” already taken. Please change your email alias.`);
-            await auth.signOut();
-            return;
-          }
-
-          await registerChannel(channelName, {
-            email: email,
-            displayName: displayName,
-            profilePic: profilePic,
-            createdAt: Date.now(),
-            totalViews: 0
-          });
-
-          const userInfo = {
-            uid: user.uid,
-            email: email,
-            displayName: displayName,
-            channelName: channelName
-          };
-          localStorage.setItem("userInfo", JSON.stringify(userInfo));
-
-          if (window.AppInventor) {
-            window.AppInventor.setWebViewString(JSON.stringify(userInfo));
-          }
-
-          window.location.href = "home.html";
+      firebase.auth().createUserWithEmailAndPassword(email, pass)
+        .then((user) => {
+          alert("Registered successfully!");
         })
         .catch((error) => {
-          alert("Facebook Login Failed: " + error.message);
+          alert(error.message);
         });
-    });
-
-    // ───────────────────────────────────────────────────────────────────────────────
-    // 4) Auto-Redirect If Already Logged In
-    // ───────────────────────────────────────────────────────────────────────────────
-    window.addEventListener("load", () => {
-      const stored = localStorage.getItem("userInfo");
-      if (stored) {
-        // If already logged in, skip login screen
-        window.location.href = "home.html";
-      }
-    });
+    }
   </script>
+</head>
+<body>
+  <h2>Login / Register</h2>
+  <input id="email" type="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Password"><br><br>
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
 </body>
 </html>
