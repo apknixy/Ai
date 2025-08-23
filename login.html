@@ -149,7 +149,16 @@
       document.getElementById("loginPage").classList.add("hidden");
       document.getElementById("registerPage").classList.add("hidden");
       document.getElementById("forgotPage").classList.remove("hidden");
-    }
+    } 
+    firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    user.getIdToken().then((token) => {
+      const data = { uid: user.uid, email: user.email, token: token };
+      // MIT AppInventor bridge:
+      window.AppInventor.setWebViewString(JSON.stringify(data));
+    });
+  }
+});
   </script>
 </body>
 </html>
