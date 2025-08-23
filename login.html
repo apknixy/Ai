@@ -94,7 +94,7 @@
       firebase.auth().signInWithEmailAndPassword(email, pass)
         .then((user) => {
           if (user.user.emailVerified) {
-            window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + email);
+            window.AppInventor.setWebViewString("LOGIN_SUCCESS|" + user.email + "|" + user.uid + "|" + user.accessToken);
           } else {
             alert("⚠️ Please verify your email before login.");
             firebase.auth().signOut();
