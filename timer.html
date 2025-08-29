@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>20s Countdown</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #6d9eff, #9b6dff);
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    .container {
+      text-align: center;
+    }
+    .circle {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 10px solid rgba(255,255,255,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto 20px;
+      position: relative;
+    }
+    .circle svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotate(-90deg);
+    }
+    .time {
+      font-size: 48px;
+      font-weight: bold;
+    }
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      margin: 0 5px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .start { background:#28a745; color:#fff; }
+    .pause { background:#ffc107; color:#000; }
+    .reset { background:#dc3545; color:#fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="circle">
+      <svg width="200" height="200">
+        <circle cx="100" cy="100" r="90" stroke="#fff" stroke-width="10" fill="none" opacity="0.2"/>
+        <circle id="progress" cx="100" cy="100" r="90" stroke="#fff" stroke-width="10" fill="none"
+                stroke-dasharray="565" stroke-dashoffset="565"/>
+      </svg>
+      <div class="time" id="timer">20</div>
+    </div>
+    <div>
+      <button class="start" onclick="startTimer()">Start</button>
+      <button class="pause" onclick="pauseTimer()">Pause</button>
+      <button class="reset" onclick="resetTimer()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    let duration = 20;       // default 20s
+    let timeLeft = duration;
+    let interval = null;
+    let progressCircle = document.getElementById("progress");
+    let timerDisplay = document.getElementById("timer");
+    const dashArray = 565;   // circumference of circle
+
+    function updateDisplay() {
+      timerDisplay.textContent = timeLeft;
+      let progress = (duration - timeLeft) / duration;
+      progressCircle.style.strokeDashoffset = dashArray * (1 - progress);
+    }
+
+    function startTimer() {
+      if (interval) return;
+      interval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay();
+        } else {
+          clearInterval(interval);
+          interval = null;
+          alert("Time's up!");
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(interval);
+      interval = null;
+    }
+
+    function resetTimer() {
+      clearInterval(interval);
+      interval = null;
+      timeLeft = duration;
+      updateDisplay();
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
