@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>20s Auto Countdown</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #6d9eff, #9b6dff);
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    .circle {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      border: 10px solid rgba(255,255,255,0.2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .circle svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotate(-90deg);
+    }
+    .time {
+      font-size: 56px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="circle">
+    <svg width="220" height="220">
+      <circle cx="110" cy="110" r="100" stroke="#fff" stroke-width="10" fill="none" opacity="0.2"/>
+      <circle id="progress" cx="110" cy="110" r="100" stroke="#fff" stroke-width="10" fill="none"
+              stroke-dasharray="628" stroke-dashoffset="628"/>
+    </svg>
+    <div class="time" id="timer">20</div>
+  </div>
+
+  <script>
+    let duration = 20;       // total seconds
+    let timeLeft = duration;
+    const dashArray = 628;   // circumference of circle
+    const progressCircle = document.getElementById("progress");
+    const timerDisplay = document.getElementById("timer");
+
+    function updateDisplay() {
+      timerDisplay.textContent = timeLeft;
+      let progress = (duration - timeLeft) / duration;
+      progressCircle.style.strokeDashoffset = dashArray * (1 - progress);
+    }
+
+    function startCountdown() {
+      let interval = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft--;
+          updateDisplay();
+        } else {
+          clearInterval(interval);
+        }
+      }, 1000);
+    }
+
+    // initialize and auto-start
+    updateDisplay();
+    startCountdown();
+  </script>
+</body>
+</html>
