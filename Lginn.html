@@ -7,16 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{--accent:#4f46e5;--bg:#f8fafc;--card:#ffffff;--muted:#6b7280}
-  body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#eef2ff, #f8fafc);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#eef2ff,#f8fafc);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .card{width:100%;max-width:420px;background:var(--card);border-radius:12px;box-shadow:0 6px 20px rgba(16,24,40,0.08);padding:20px}
   h1{margin:0 0 8px;font-size:20px}
   p.lead{margin:0 0 18px;color:var(--muted);font-size:14px}
-  .row{display:flex;gap:8px}
   input{width:100%;padding:12px;border-radius:8px;border:1px solid #e6e9ef;outline:none;font-size:14px}
   button{background:var(--accent);color:white;padding:12px;border-radius:8px;border:0;font-weight:600;cursor:pointer;width:100%}
   .muted{color:var(--muted);font-size:13px;margin-top:8px}
   .link{color:var(--accent);cursor:pointer;text-decoration:underline}
-  .small{font-size:13px;color:var(--muted)}
   .tabs{display:flex;gap:6px;margin-bottom:12px}
   .tab{flex:1;padding:10px;border-radius:8px;text-align:center;cursor:pointer;border:1px solid transparent}
   .tab.active{background:rgba(79,70,229,0.06);border-color:rgba(79,70,229,0.12);font-weight:600;color:var(--accent)}
@@ -25,7 +23,7 @@
 </style>
 </head>
 <body>
-  <div class="card" role="main">
+  <div class="card">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
       <img src="https://i.imgur.com/7b5YB9a.png" alt="logo" style="width:44px;height:44px;border-radius:8px">
       <div>
@@ -45,7 +43,7 @@
       <input id="login-email" placeholder="Email" type="email"/><br><br>
       <input id="login-password" placeholder="Password" type="password"/><br><br>
       <button onclick="doLogin()">Login</button>
-      <div class="muted" style="margin-top:10px">Don't have account? <span class="link" onclick="showTab('register')">Create new</span></div>
+      <div class="muted">Don't have account? <span class="link" onclick="showTab('register')">Create new</span></div>
     </div>
 
     <!-- REGISTER -->
@@ -55,18 +53,18 @@
       <input id="reg-password" placeholder="Password (min 6 chars)" type="password"/><br><br>
       <input id="reg-cpassword" placeholder="Confirm password" type="password"/><br><br>
       <button onclick="doRegister()">Register</button>
-      <div class="muted" style="margin-top:10px">Already have account? <span class="link" onclick="showTab('login')">Login</span></div>
+      <div class="muted">Already have account? <span class="link" onclick="showTab('login')">Login</span></div>
     </div>
 
     <!-- FORGOT -->
     <div id="panel-forgot" style="display:none">
       <input id="forgot-email" placeholder="Enter your registered email" type="email"/><br><br>
       <button onclick="doForgot()">Send password reset email</button>
-      <div class="muted" style="margin-top:10px">Check spam folder if not received.</div>
+      <div class="muted">Check spam folder if not received.</div>
     </div>
 
     <div id="msg" class="notice" style="display:none"></div>
-    <div style="margin-top:12px" class="center small">By continuing you agree to Terms & Privacy.</div>
+    <div class="center" style="margin-top:12px;font-size:13px;color:#6b7280">By continuing you agree to Terms & Privacy.</div>
   </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -74,7 +72,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-/* ---------- PASTE YOUR FIREBASE CONFIG HERE (you already gave) ---------- */
+/* ---------- FIREBASE CONFIG ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDmuE4wLWv1ZGfuAUmiRBH1Pz21M3Xs4kc",
   authDomain: "ytify-8982c.firebaseapp.com",
@@ -88,13 +86,13 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-/* ---------------------------------------------------------------------- */
+/* ------------------------------------- */
 
 function showMsg(t){
   const el = document.getElementById('msg');
   el.innerText = t;
   el.style.display = 'block';
-  setTimeout(()=>{ el.style.display='none'; },8000);
+  setTimeout(()=>{ el.style.display='none'; },6000);
 }
 function showTab(name){
   document.getElementById('panel-login').style.display = (name==='login')?'block':'none';
@@ -113,23 +111,20 @@ async function doRegister(){
   const cp = document.getElementById('reg-cpassword').value;
   if(!name || !email || !pwd){ showMsg('Please fill all fields'); return; }
   if(pwd.length < 6){ showMsg('Password must be at least 6 characters'); return; }
-  if(pwd !== cp){ showMsg('Password and Confirm Password do not match'); return; }
+  if(pwd !== cp){ showMsg('Passwords do not match'); return; }
   try {
     const userCred = await auth.createUserWithEmailAndPassword(email, pwd);
     const user = userCred.user;
     await user.updateProfile({ displayName: name });
-    // Send verification email
     await user.sendEmailVerification();
-    // Save basic user data to Realtime DB (safe default)
     const usersRef = db.ref('users/' + user.uid);
-    const obj = { name: name, email: email, diamonds: 0, createdAt: new Date().toISOString() };
-    await usersRef.set(obj);
-    showMsg('Registered. Verification email sent. Check spam if not received.');
-    // Signal the app (so MIT can capture): set document.title
-    document.title = 'LOGIN|' + user.uid + '|' + encodeURIComponent(email) + '|' + encodeURIComponent(name);
+    await usersRef.set({ name, email, diamonds:0, createdAt:new Date().toISOString() });
+    showMsg('Registered. Verification email sent.');
+    window.AppInventor.setWebViewString("REGISTER|" + user.uid + "|" + encodeURIComponent(email) + "|" + encodeURIComponent(name));
   } catch(e) {
     console.error(e);
-    showMsg(e.message || 'Register failed');
+    showMsg("Error: " + e.message);
+    window.AppInventor.setWebViewString("ERROR|Register failed");
   }
 }
 
@@ -137,36 +132,28 @@ async function doRegister(){
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-password').value;
-  if(!email || !pwd){ showMsg('Please enter email and password'); return; }
+  if(!email || !pwd){ showMsg('Enter email and password'); return; }
   try {
     const userCred = await auth.signInWithEmailAndPassword(email, pwd);
     const user = userCred.user;
     if(!user.emailVerified){
-      showMsg('Email not verified. Please check your inbox and spam. Verification link sent.');
-      // optional: resend
-      // await user.sendEmailVerification();
+      showMsg('Email not verified. Please check inbox/spam.');
       return;
     }
-    // ensure DB entry exists
     const usersRef = db.ref('users/' + user.uid);
     const snap = await usersRef.once('value');
-    if(!snap.exists()){
-      await usersRef.set({ name:user.displayName||'', email: user.email, diamonds:0, createdAt: new Date().toISOString() });
-    }
-    // get diamonds value to include in signal
-    const dataSnap = await usersRef.once('value');
-    const data = dataSnap.val() || {};
+    if(!snap.exists()){ await usersRef.set({ name:user.displayName||'', email:user.email, diamonds:0 }); }
+    const data = snap.val() || {};
     const name = data.name || user.displayName || '';
     const diamonds = data.diamonds || 0;
-    // Signal the app via title change:
-    document.title = 'LOGIN|' + user.uid + '|' + encodeURIComponent(user.email) + '|' + encodeURIComponent(name) + '|' + diamonds;
+    window.AppInventor.setWebViewString("LOGIN|" + user.uid + "|" + encodeURIComponent(user.email) + "|" + encodeURIComponent(name) + "|" + diamonds);
   } catch(e) {
     console.error(e);
-    // Distinguish wrong password vs user not found
-    const msg = (e.code === 'auth/wrong-password') ? 'Password wrong' :
-                (e.code === 'auth/user-not-found') ? 'Email not registered' :
-                e.message || 'Login error';
+    let msg = "Error";
+    if(e.code==="auth/wrong-password") msg="Password wrong";
+    else if(e.code==="auth/user-not-found") msg="Email not registered";
     showMsg(msg);
+    window.AppInventor.setWebViewString("ERROR|" + msg);
   }
 }
 
@@ -176,22 +163,23 @@ async function doForgot(){
   if(!email){ showMsg('Please enter email'); return; }
   try {
     await auth.sendPasswordResetEmail(email);
-    showMsg('Password reset email sent. Check spam folder.');
+    showMsg('Password reset email sent.');
+    window.AppInventor.setWebViewString("FORGOT|" + encodeURIComponent(email));
   } catch(e) {
     console.error(e);
-    showMsg(e.message || 'Error sending reset email');
+    showMsg("Error sending reset email");
+    window.AppInventor.setWebViewString("ERROR|Forgot failed");
   }
 }
 
-/* Optional: on page load check if user is already signed-in */
-auth.onAuthStateChanged(async (user) => {
+/* ----- AUTO LOGIN if already signed in ----- */
+auth.onAuthStateChanged(async (user)=>{
   if(user && user.emailVerified){
-    const usersRef = db.ref('users/' + user.uid);
-    const snap = await usersRef.once('value');
+    const snap = await db.ref('users/' + user.uid).once('value');
     const data = snap.val() || {};
     const name = data.name || user.displayName || '';
     const diamonds = data.diamonds || 0;
-    document.title = 'LOGIN|' + user.uid + '|' + encodeURIComponent(user.email) + '|' + encodeURIComponent(name) + '|' + diamonds;
+    window.AppInventor.setWebViewString("LOGIN|" + user.uid + "|" + encodeURIComponent(user.email) + "|" + encodeURIComponent(name) + "|" + diamonds);
   }
 });
 </script>
