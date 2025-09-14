@@ -135,40 +135,35 @@ async function doRegister(){
 
 /* ----- LOGIN ----- */
 async function doLogin(){
-  const email = document.getElementById('login-email').value.trim();
-  const pwd = document.getElementById('login-password').value;
-  if(!email || !pwd){ showMsg('Please enter email and password'); return; }
+  const emailInput = document.getElementById("login-email").value.trim();
+  const passwordInput = document.getElementById("login-password").value;
+
+  if(!emailInput || !passwordInput){
+    showMsg("Please enter Email and Password");
+    return;
+  }
+
   try {
-    const userCred = await auth.signInWithEmailAndPassword(email, pwd);
+    // Firebase Auth se login
+    const userCred = await firebase.auth().signInWithEmailAndPassword(emailInput, passwordInput);
     const user = userCred.user;
+
+    // Agar email verify nahi hai
     if(!user.emailVerified){
-      showMsg('Email not verified. Please check your inbox and spam.');
+      showMsg("Please verify your email before login. Check inbox/spam.");
       return;
     }
 
-    // ensure DB entry exists
-    const usersRef = db.ref('users/' + user.uid);
-    const snap = await usersRef.once('value');
-    if(!snap.exists()){
-      await usersRef.set({ name:user.displayName||'', email: user.email, diamonds:0, createdAt: new Date().toISOString() });
-    }
+    // Email ko App Inventor ko bhejna
+    window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + user.email);
 
-    // get user data
-    const dataSnap = await usersRef.once('value');
-    const data = dataSnap.val() || {};
-    const name = data.name || user.displayName || '';
-    const diamonds = data.diamonds || 0;
-
-    // 👇 Yeh line add karo
-    if(window.AppInventor){
-      window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + userEmail);
-    }
-
-  } catch(e) {
+  } catch(e){
     console.error(e);
-    const msg = (e.code === 'auth/wrong-password') ? 'Password wrong' :
-                (e.code === 'auth/user-not-found') ? 'Email not registered' :
-                e.message || 'Login error';
+    let msg = "Login failed";
+    if(e.code === "auth/wrong-password") msg = "Wrong password";
+    else if(e.code === "auth/user-not-found") msg = "Email not registered";
+    else if(e.code === "auth/invalid-email") msg = "Invalid email";
+
     showMsg(msg);
   }
 }
