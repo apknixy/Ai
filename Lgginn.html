@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{--accent:#4f46e5;--bg:#f8fafc;--card:#ffffff;--muted:#6b7280}
-  body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#eef2ff,#f8fafc);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:linear-gradient(180deg,#eef2ff, #f8fafc);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .card{width:100%;max-width:420px;background:var(--card);border-radius:12px;box-shadow:0 6px 20px rgba(16,24,40,0.08);padding:20px}
   h1{margin:0 0 8px;font-size:20px}
   p.lead{margin:0 0 18px;color:var(--muted);font-size:14px}
@@ -15,22 +15,17 @@
   button{background:var(--accent);color:white;padding:12px;border-radius:8px;border:0;font-weight:600;cursor:pointer;width:100%}
   .muted{color:var(--muted);font-size:13px;margin-top:8px}
   .link{color:var(--accent);cursor:pointer;text-decoration:underline}
+  .small{font-size:13px;color:var(--muted)}
   .tabs{display:flex;gap:6px;margin-bottom:12px}
   .tab{flex:1;padding:10px;border-radius:8px;text-align:center;cursor:pointer;border:1px solid transparent}
   .tab.active{background:rgba(79,70,229,0.06);border-color:rgba(79,70,229,0.12);font-weight:600;color:var(--accent)}
   .notice{background:#fffbeb;border:1px solid #fde68a;padding:10px;border-radius:8px;margin-top:10px;color:#854d0e;font-size:13px}
-  .center{display:flex;justify-content:center}
 </style>
 </head>
 <body>
   <div class="card">
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-      <img src="https://i.imgur.com/7b5YB9a.png" alt="logo" style="width:44px;height:44px;border-radius:8px">
-      <div>
-        <h1>QuizEarn</h1>
-        <p class="lead">Play quizzes, watch ads & earn Diamonds. Secure login with email.</p>
-      </div>
-    </div>
+    <h1>QuizEarn</h1>
+    <p class="lead">Login or create account to start earning Diamonds.</p>
 
     <div class="tabs">
       <div id="tab-login" class="tab active" onclick="showTab('login')">Login</div>
@@ -43,7 +38,7 @@
       <input id="login-email" placeholder="Email" type="email"/><br><br>
       <input id="login-password" placeholder="Password" type="password"/><br><br>
       <button onclick="doLogin()">Login</button>
-      <div class="muted">Don't have account? <span class="link" onclick="showTab('register')">Create new</span></div>
+      <div class="muted">Don’t have account? <span class="link" onclick="showTab('register')">Create new</span></div>
     </div>
 
     <!-- REGISTER -->
@@ -58,13 +53,12 @@
 
     <!-- FORGOT -->
     <div id="panel-forgot" style="display:none">
-      <input id="forgot-email" placeholder="Enter your registered email" type="email"/><br><br>
-      <button onclick="doForgot()">Send password reset email</button>
+      <input id="forgot-email" placeholder="Enter registered email" type="email"/><br><br>
+      <button onclick="doForgot()">Send reset email</button>
       <div class="muted">Check spam folder if not received.</div>
     </div>
 
     <div id="msg" class="notice" style="display:none"></div>
-    <div class="center" style="margin-top:12px;font-size:13px;color:#6b7280">By continuing you agree to Terms & Privacy.</div>
   </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -72,7 +66,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-/* ---------- FIREBASE CONFIG ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDmuE4wLWv1ZGfuAUmiRBH1Pz21M3Xs4kc",
   authDomain: "ytify-8982c.firebaseapp.com",
@@ -86,7 +79,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
-/* ------------------------------------- */
 
 function showMsg(t){
   const el = document.getElementById('msg');
@@ -94,6 +86,7 @@ function showMsg(t){
   el.style.display = 'block';
   setTimeout(()=>{ el.style.display='none'; },6000);
 }
+
 function showTab(name){
   document.getElementById('panel-login').style.display = (name==='login')?'block':'none';
   document.getElementById('panel-register').style.display = (name==='register')?'block':'none';
@@ -103,85 +96,67 @@ function showTab(name){
   document.getElementById('tab-forgot').classList.toggle('active', name==='forgot');
 }
 
-/* ----- REGISTER ----- */
+/* REGISTER */
 async function doRegister(){
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const pwd = document.getElementById('reg-password').value;
   const cp = document.getElementById('reg-cpassword').value;
-  if(!name || !email || !pwd){ showMsg('Please fill all fields'); return; }
-  if(pwd.length < 6){ showMsg('Password must be at least 6 characters'); return; }
-  if(pwd !== cp){ showMsg('Passwords do not match'); return; }
+  if(!name || !email || !pwd){ showMsg("Fill all fields"); return; }
+  if(pwd.length < 6){ showMsg("Password must be at least 6 chars"); return; }
+  if(pwd !== cp){ showMsg("Passwords do not match"); return; }
+
   try {
     const userCred = await auth.createUserWithEmailAndPassword(email, pwd);
     const user = userCred.user;
     await user.updateProfile({ displayName: name });
     await user.sendEmailVerification();
-    const usersRef = db.ref('users/' + user.uid);
-    await usersRef.set({ name, email, diamonds:0, createdAt:new Date().toISOString() });
-    showMsg('Registered. Verification email sent.');
-    window.AppInventor.setWebViewString("REGISTER|" + user.uid + "|" + encodeURIComponent(email) + "|" + encodeURIComponent(name));
-  } catch(e) {
-    console.error(e);
-    showMsg("Error: " + e.message);
-    window.AppInventor.setWebViewString("ERROR|Register failed");
-  }
+    await db.ref('users/' + user.uid).set({ name, email, diamonds:0 });
+    showMsg("Registered! Verification email sent.");
+  } catch(e){ showMsg("Error: " + cleanError(e)); }
 }
 
-/* ----- LOGIN ----- */
+/* LOGIN */
 async function doLogin(){
   const email = document.getElementById('login-email').value.trim();
   const pwd = document.getElementById('login-password').value;
-  if(!email || !pwd){ showMsg('Enter email and password'); return; }
+  if(!email || !pwd){ showMsg("Enter email & password"); return; }
+
   try {
     const userCred = await auth.signInWithEmailAndPassword(email, pwd);
     const user = userCred.user;
     if(!user.emailVerified){
-      showMsg('Email not verified. Please check inbox/spam.');
+      showMsg("Please verify your email first.");
       return;
     }
-    const usersRef = db.ref('users/' + user.uid);
-    const snap = await usersRef.once('value');
-    if(!snap.exists()){ await usersRef.set({ name:user.displayName||'', email:user.email, diamonds:0 }); }
-    const data = snap.val() || {};
-    const name = data.name || user.displayName || '';
-    const diamonds = data.diamonds || 0;
-    window.AppInventor.setWebViewString("LOGIN|" + user.uid + "|" + encodeURIComponent(user.email) + "|" + encodeURIComponent(name) + "|" + diamonds);
-  } catch(e) {
-    console.error(e);
-    let msg = "Error";
-    if(e.code==="auth/wrong-password") msg="Password wrong";
-    else if(e.code==="auth/user-not-found") msg="Email not registered";
-    showMsg(msg);
-    window.AppInventor.setWebViewString("ERROR|" + msg);
-  }
+    // send signal to MIT
+    if(window.AppInventor){
+      window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + user.email);
+    }
+  } catch(e){ showMsg("Error: " + cleanError(e)); }
 }
 
-/* ----- FORGOT PASSWORD ----- */
+/* FORGOT */
 async function doForgot(){
   const email = document.getElementById('forgot-email').value.trim();
-  if(!email){ showMsg('Please enter email'); return; }
+  if(!email){ showMsg("Enter your email"); return; }
   try {
     await auth.sendPasswordResetEmail(email);
-    showMsg('Password reset email sent.');
-    window.AppInventor.setWebViewString("FORGOT|" + encodeURIComponent(email));
-  } catch(e) {
-    console.error(e);
-    showMsg("Error sending reset email");
-    window.AppInventor.setWebViewString("ERROR|Forgot failed");
-  }
+    showMsg("Reset email sent. Check inbox & spam.");
+  } catch(e){ showMsg("Error: " + cleanError(e)); }
 }
 
-/* ----- AUTO LOGIN if already signed in ----- */
-auth.onAuthStateChanged(async (user)=>{
-  if(user && user.emailVerified){
-    const snap = await db.ref('users/' + user.uid).once('value');
-    const data = snap.val() || {};
-    const name = data.name || user.displayName || '';
-    const diamonds = data.diamonds || 0;
-    window.AppInventor.setWebViewString("LOGIN|" + user.uid + "|" + encodeURIComponent(user.email) + "|" + encodeURIComponent(name) + "|" + diamonds);
+/* Helper: clean firebase error */
+function cleanError(e){
+  if(!e || !e.code) return "Unknown error";
+  switch(e.code){
+    case "auth/invalid-email": return "Invalid email format";
+    case "auth/user-not-found": return "Email not registered";
+    case "auth/wrong-password": return "Wrong password";
+    case "auth/email-already-in-use": return "Email already in use";
+    default: return "Please try again";
   }
-});
+}
 </script>
 </body>
 </html>
