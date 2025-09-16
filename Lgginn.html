@@ -1,232 +1,108 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Earn & Learn - Login/Register</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-        .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-        }
-        h2 {
-            margin-bottom: 20px;
-            color: #4a4a4a;
-        }
-        input {
-            width: calc(100% - 22px);
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .login-btn {
-            background-color: #007bff;
-        }
-        .register-btn {
-            background-color: #28a745;
-        }
-        .reset-btn {
-            background-color: #ffc107;
-        }
-        .login-btn:hover {
-            background-color: #0056b3;
-        }
-        .register-btn:hover {
-            background-color: #218838;
-        }
-        .reset-btn:hover {
-            background-color: #e0a800;
-        }
-        .error {
-            color: #d9534f;
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-        .link {
-            color: #007bff;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-            display: inline-block;
-        }
-        #forgot-password-form, #register-form {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Login/Register</title>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f2f2f2; text-align:center; }
+    .box { background:white; padding:20px; margin:50px auto; width:300px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.2); }
+    input { width:90%; padding:10px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
+    button { width:95%; padding:10px; background:#4CAF50; color:white; border:none; border-radius:5px; cursor:pointer; }
+    button:hover { background:#45a049; }
+    a { display:block; margin-top:10px; color:blue; cursor:pointer; }
+    .hidden { display:none; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div id="login-form">
-            <h2>Login</h2>
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Password" required>
-            <div id="login-error" class="error"></div>
-            <button class="login-btn" onclick="signInUser()">Login</button>
-            <p><span class="link" onclick="showRegisterForm()">Don't have an account? Register</span></p>
-            <p><span class="link" onclick="showForgotPasswordForm()">Forgot Password?</span></p>
-        </div>
 
-        <div id="register-form">
-            <h2>Register</h2>
-            <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Password" required>
-            <div id="register-error" class="error"></div>
-            <button class="register-btn" onclick="registerUser()">Register</button>
-            <p><span class="link" onclick="showLoginForm()">Back to Login</span></p>
-        </div>
+<!-- Register -->
+<div id="registerBox" class="box">
+  <h2>Register</h2>
+  <input type="email" id="regEmail" placeholder="Email">
+  <input type="password" id="regPass" placeholder="Password">
+  <input type="password" id="regConfirm" placeholder="Confirm Password">
+  <button onclick="register()">Next</button>
+  <a onclick="showLogin()">Already have account? Login</a>
+</div>
 
-        <div id="forgot-password-form">
-            <h2>Forgot Password</h2>
-            <input type="email" id="reset-email" placeholder="Enter your email" required>
-            <div id="reset-error" class="error"></div>
-            <button class="reset-btn" onclick="sendPasswordReset()">Send Reset Link</button>
-            <p><span class="link" onclick="showLoginForm()">Back to Login</span></p>
-        </div>
-    </div>
+<!-- Login -->
+<div id="loginBox" class="box hidden">
+  <h2>Login</h2>
+  <input type="email" id="loginEmail" placeholder="Email">
+  <input type="password" id="loginPass" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <a onclick="showForgot()">Forgot Password?</a>
+  <a onclick="showRegister()">Not have any account? Register</a>
+</div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script>
-        // Replace with your Firebase config
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+<!-- Forgot Password -->
+<div id="forgotBox" class="box hidden">
+  <h2>Forgot Password</h2>
+  <input type="email" id="forgotEmail" placeholder="Enter your email">
+  <button onclick="resetPass()">Reset Password</button>
+  <a onclick="showLogin()">Back to Login</a>
+</div>
 
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+<p id="msg"></p>
 
-        function showError(formId, message) {
-            document.getElementById(formId + "-error").innerText = message;
+<script>
+  // ✅ Firebase Config डालो
+  const firebaseConfig = {
+    apiKey: "YOUR-API-KEY",
+    authDomain: "YOUR-PROJECT.firebaseapp.com",
+    projectId: "YOUR-PROJECT",
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+
+  // Toggle views
+  function showLogin(){ document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); document.getElementById('forgotBox').classList.add('hidden'); }
+  function showRegister(){ document.getElementById('registerBox').classList.remove('hidden'); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('forgotBox').classList.add('hidden'); }
+  function showForgot(){ document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.add('hidden'); document.getElementById('forgotBox').classList.remove('hidden'); }
+
+  function showMsg(m){ document.getElementById('msg').innerText = m; }
+
+  // ✅ Register
+  function register(){
+    let email = document.getElementById('regEmail').value;
+    let pass = document.getElementById('regPass').value;
+    let confirm = document.getElementById('regConfirm').value;
+    if(pass !== confirm){ showMsg("Passwords do not match"); return; }
+    auth.createUserWithEmailAndPassword(email, pass)
+      .then(user => {
+        user.user.sendEmailVerification();
+        showMsg("Verification link sent. Check Inbox or Spam folder.");
+        showLogin();
+      })
+      .catch(e => showMsg("Error: " + e.message));
+  }
+
+  // ✅ Login
+  function login(){
+    let email = document.getElementById('loginEmail').value;
+    let pass = document.getElementById('loginPass').value;
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(user => {
+        if(user.user.emailVerified){
+          // AppInventor को signal भेजना
+          window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + user.user.uid);
+        } else {
+          showMsg("Please verify your email first (check spam).");
         }
+      })
+      .catch(e => showMsg("Error: " + e.message));
+  }
 
-        function showLoginForm() {
-            document.getElementById("login-form").style.display = 'block';
-            document.getElementById("register-form").style.display = 'none';
-            document.getElementById("forgot-password-form").style.display = 'none';
-            showError("login", ""); // Clear previous errors
-        }
-
-        function showRegisterForm() {
-            document.getElementById("login-form").style.display = 'none';
-            document.getElementById("register-form").style.display = 'block';
-            document.getElementById("forgot-password-form").style.display = 'none';
-            showError("register", ""); // Clear previous errors
-        }
-
-        function showForgotPasswordForm() {
-            document.getElementById("login-form").style.display = 'none';
-            document.getElementById("register-form").style.display = 'none';
-            document.getElementById("forgot-password-form").style.display = 'block';
-            showError("reset", ""); // Clear previous errors
-        }
-
-        async function registerUser() {
-            const email = document.getElementById("register-email").value;
-            const password = document.getElementById("register-password").value;
-            showError("register", "");
-
-            try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                await userCredential.user.sendEmailVerification();
-                alert("Registration successful! A verification link has been sent to your email.");
-                showLoginForm();
-            } catch (error) {
-                let errorMessage = "Registration failed. Please try again.";
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = "This email is already registered.";
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = "Password should be at least 6 characters.";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = "Invalid email address.";
-                        break;
-                }
-                showError("register", errorMessage);
-            }
-        }
-
-        async function signInUser() {
-            const email = document.getElementById("login-email").value;
-            const password = document.getElementById("login-password").value;
-            showError("login", "");
-
-            try {
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                if (!user.emailVerified) {
-                    showError("login", "Please verify your email first.");
-                    return;
-                }
-                // Login successful - send signal to App Inventor
-                window.AppInventor.setWebViewString("LOGIN_SUCCESS:" + user.email);
-            } catch (error) {
-                let errorMessage = "Login failed. Please check your credentials.";
-                switch (error.code) {
-                    case 'auth/wrong-password':
-                    case 'auth/user-not-found':
-                    case 'auth/invalid-credential': // New Firebase 9 error code
-                        errorMessage = "Incorrect email or password.";
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage = "Your account has been disabled.";
-                        break;
-                }
-                showError("login", errorMessage);
-            }
-        }
-
-        async function sendPasswordReset() {
-            const email = document.getElementById("reset-email").value;
-            showError("reset", "");
-            try {
-                await auth.sendPasswordResetEmail(email);
-                alert("Password reset link sent! Check your email.");
-                showLoginForm();
-            } catch (error) {
-                let errorMessage = "Could not send reset link. Please check the email.";
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = "No user found with this email.";
-                        break;
-                }
-                showError("reset", errorMessage);
-            }
-        }
-    </script>
+  // ✅ Forgot Password
+  function resetPass(){
+    let email = document.getElementById('forgotEmail').value;
+    auth.sendPasswordResetEmail(email)
+      .then(() => showMsg("Password reset link sent. Check Inbox or Spam."))
+      .catch(e => showMsg("Error: " + e.message));
+  }
+</script>
 </body>
 </html>
